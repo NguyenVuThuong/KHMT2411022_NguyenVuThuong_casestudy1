@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Bảng màu tập trung của app — mọi nơi khác chỉ tham chiếu tới đây,
-/// giúp đổi theme (VD sang dark mode) chỉ cần sửa 1 chỗ duy nhất.
 class AppColors {
   AppColors._();
 

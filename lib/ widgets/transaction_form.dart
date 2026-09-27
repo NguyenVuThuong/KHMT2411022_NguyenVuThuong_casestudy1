@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+
 import '../models/transaction_category.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
-/// Dữ liệu 1 giao dịch — dùng để truyền giá trị khởi tạo cho form
-/// (null nghĩa là "Thêm mới", có giá trị nghĩa là "Sửa giao dịch có sẵn").
 class TransactionData {
   const TransactionData({
     required this.type,
@@ -21,10 +20,6 @@ class TransactionData {
   final String note;
 }
 
-/// Form dùng chung cho cả 2 màn hình "Thêm giao dịch" và "Sửa giao dịch".
-/// Khác biệt duy nhất giữa 2 màn hình là [title] và [initialData]:
-/// - Thêm mới: initialData = null → toàn bộ ô để trống
-/// - Sửa: initialData khác null → các ô tự điền sẵn giá trị cũ
 class TransactionForm extends StatefulWidget {
   const TransactionForm({
     super.key,
@@ -156,13 +151,16 @@ class _TransactionFormState extends State<TransactionForm> {
                       Expanded(
                         child: Text(
                           '${_date.day.toString().padLeft(2, '0')}/'
-                              '${_date.month.toString().padLeft(2, '0')}/'
-                              '${_date.year}',
+                          '${_date.month.toString().padLeft(2, '0')}/'
+                          '${_date.year}',
                           style: const TextStyle(color: AppColors.textPrimary),
                         ),
                       ),
-                      const Icon(Icons.calendar_today_outlined,
-                          size: 18, color: AppColors.textSecondary),
+                      const Icon(
+                        Icons.calendar_today_outlined,
+                        size: 18,
+                        color: AppColors.textSecondary,
+                      ),
                     ],
                   ),
                 ),
@@ -207,8 +205,6 @@ class _TransactionFormState extends State<TransactionForm> {
   }
 }
 
-// ---------------- Các widget con dùng nội bộ trong form ----------------
-
 class _FieldLabel extends StatelessWidget {
   const _FieldLabel(this.text);
   final String text;
@@ -226,7 +222,6 @@ class _FieldLabel extends StatelessWidget {
   }
 }
 
-/// Khung viền chung cho các ô nhập liệu, đảm bảo đồng nhất bo góc/viền
 class _InputBox extends StatelessWidget {
   const _InputBox({required this.child, this.height});
   final Widget child;
@@ -246,7 +241,6 @@ class _InputBox extends StatelessWidget {
   }
 }
 
-/// Toggle 2 nút "Chi tiêu" / "Thu nhập"
 class _TypeToggle extends StatelessWidget {
   const _TypeToggle({required this.value, required this.onChanged});
   final TransactionType value;
@@ -313,7 +307,6 @@ class _ToggleButton extends StatelessWidget {
   }
 }
 
-/// Ô chọn danh mục — bấm vào sẽ mở bottom sheet danh sách danh mục
 class _CategoryPicker extends StatelessWidget {
   const _CategoryPicker({required this.value, required this.onChanged});
   final TransactionCategory value;
@@ -329,11 +322,13 @@ class _CategoryPicker extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: TransactionCategory.sample
-              .map((c) => ListTile(
-            leading: _CategoryIcon(icon: c.icon),
-            title: Text(c.label),
-            onTap: () => Navigator.pop(context, c),
-          ))
+              .map(
+                (c) => ListTile(
+                  leading: _CategoryIcon(icon: c.icon),
+                  title: Text(c.label),
+                  onTap: () => Navigator.pop(context, c),
+                ),
+              )
               .toList(),
         ),
       ),
@@ -351,11 +346,15 @@ class _CategoryPicker extends StatelessWidget {
             _CategoryIcon(icon: value.icon),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(value.label,
-                  style: const TextStyle(color: AppColors.textPrimary)),
+              child: Text(
+                value.label,
+                style: const TextStyle(color: AppColors.textPrimary),
+              ),
             ),
-            const Icon(Icons.keyboard_arrow_down,
-                color: AppColors.textSecondary),
+            const Icon(
+              Icons.keyboard_arrow_down,
+              color: AppColors.textSecondary,
+            ),
           ],
         ),
       ),

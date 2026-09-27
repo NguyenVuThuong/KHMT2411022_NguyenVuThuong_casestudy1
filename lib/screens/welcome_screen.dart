@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
@@ -86,7 +87,7 @@ class _WalletIcon extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Vệt glow mờ phía sau, tạo cảm giác "phát sáng" nhẹ
+
           Container(
             width: 120,
             height: 120,
@@ -95,7 +96,7 @@ class _WalletIcon extends StatelessWidget {
               shape: BoxShape.circle,
             ),
           ),
-          // Nắp ví (xanh lá) — đặt lệch phía sau + có bóng đổ riêng
+
           Positioned(
             top: 14,
             child: Container(
@@ -114,7 +115,7 @@ class _WalletIcon extends StatelessWidget {
               ),
             ),
           ),
-          // Thân ví (xanh dương) — nổi lên trên, bóng đổ rõ hơn
+
           Positioned(
             bottom: 8,
             child: Container(
