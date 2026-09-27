@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+
 import 'app_colors.dart';
 
-
+/// Style chữ tập trung — đảm bảo đồng nhất font-size/weight toàn app.
 class AppTextStyles {
   AppTextStyles._();
 

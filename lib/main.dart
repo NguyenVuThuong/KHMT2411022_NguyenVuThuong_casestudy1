@@ -1,10 +1,11 @@
+import 'package:casestudy1/screens/add_transaction_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'screens/welcome_screen.dart';
 import 'theme/app_colors.dart';
 
 void main() {
-  // Status bar trong suốt, icon tối màu — giúp Welcome Screen trông liền mạch
+
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -27,7 +28,7 @@ class ExpenseManagerApp extends StatelessWidget {
         scaffoldBackgroundColor: AppColors.background,
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
       ),
-      home: const WelcomeScreen(),
+      home: const AddTransactionScreen(),
     );
   }
 }
