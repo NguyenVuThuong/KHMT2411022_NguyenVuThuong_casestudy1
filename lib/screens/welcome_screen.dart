@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
+
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import 'dashboard_screen.dart';
 
-/// Màn hình chào cho ứng dụng Expense Manager.
-/// Có hiệu ứng fade + slide nhẹ khi vào màn hình, và UI có chiều sâu
-/// (đổ bóng mềm, vệt màu glow) thay vì flat hoàn toàn.
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
@@ -59,10 +57,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   Spacer(flex: isSmallScreen ? 2 : 3),
                   const _WalletIcon(),
                   const SizedBox(height: 36),
-                  const Text(
-                    'Expense Manager',
-                    style: AppTextStyles.title,
-                  ),
+                  const Text('Expense Manager', style: AppTextStyles.title),
                   const SizedBox(height: 12),
                   const Text(
                     'Quản lý chi tiêu cá nhân\nđơn giản và hiệu quả',
@@ -91,7 +86,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   }
 }
 
-/// Icon ví: 2 khối bo góc chồng nhau + vệt glow mờ phía sau để tạo chiều sâu.
 class _WalletIcon extends StatelessWidget {
   const _WalletIcon();
 
@@ -103,7 +97,6 @@ class _WalletIcon extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Vệt glow mờ phía sau, tạo cảm giác "phát sáng" nhẹ
           Container(
             width: 120,
             height: 120,
@@ -112,7 +105,7 @@ class _WalletIcon extends StatelessWidget {
               shape: BoxShape.circle,
             ),
           ),
-          // Nắp ví (xanh lá) — đặt lệch phía sau + có bóng đổ riêng
+
           Positioned(
             top: 14,
             child: Container(
@@ -131,7 +124,7 @@ class _WalletIcon extends StatelessWidget {
               ),
             ),
           ),
-          // Thân ví (xanh dương) — nổi lên trên, bóng đổ rõ hơn
+
           Positioned(
             bottom: 8,
             child: Container(
@@ -174,9 +167,6 @@ class _WalletIcon extends StatelessWidget {
   }
 }
 
-/// Nút hành động chính — bo tròn, gradient, có bóng đổ.
-/// Dùng ElevatedButton (onPressed) thay vì InkWell (onTap) để quen thuộc
-/// hơn với cách viết nút bấm tiêu chuẩn trong Flutter.
 class _PrimaryButton extends StatelessWidget {
   const _PrimaryButton({required this.label, required this.onPressed});
 
@@ -188,9 +178,7 @@ class _PrimaryButton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       height: 56,
-      // Ink vẽ nền gradient phía sau — ElevatedButton bên trong để nền
-      // trong suốt để thấy được gradient của Ink, đồng thời vẫn giữ hiệu
-      // ứng ripple khi nhấn.
+
       child: Ink(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
@@ -219,9 +207,7 @@ class _PrimaryButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
             ),
           ),
-          child: Center(
-            child: Text(label, style: AppTextStyles.button),
-          ),
+          child: Center(child: Text(label, style: AppTextStyles.button)),
         ),
       ),
     );
