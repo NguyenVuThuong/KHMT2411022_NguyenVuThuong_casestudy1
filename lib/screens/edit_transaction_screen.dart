@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../ widgets/transaction_form.dart';
+import 'package:casestudy1/widgets/transaction_form.dart';
 
 class EditTransactionScreen extends StatelessWidget {
   const EditTransactionScreen({super.key, required this.transaction});

@@ -1,11 +1,10 @@
-import 'package:casestudy1/screens/add_transaction_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import 'screens/welcome_screen.dart';
 import 'theme/app_colors.dart';
 
 void main() {
-
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -28,7 +27,7 @@ class ExpenseManagerApp extends StatelessWidget {
         scaffoldBackgroundColor: AppColors.background,
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
       ),
-      home: const AddTransactionScreen(),
+      home: const WelcomeScreen(),
     );
   }
 }
