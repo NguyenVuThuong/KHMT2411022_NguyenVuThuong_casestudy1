@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../models/transaction_category.dart';
+import '../models/transaction_model.dart';
+import '../repositories/transaction_repository.dart';
 import '../theme/app_colors.dart';
 import '../widgets/balance_card.dart';
 import '../widgets/summary_card.dart';
-import '../widgets/transaction_form.dart' show TransactionData;
 import '../widgets/transaction_tile.dart';
 import 'add_transaction_screen.dart';
 import 'edit_transaction_screen.dart';
@@ -17,76 +17,79 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int _currentTab = 0;
+  final TransactionRepository _repository = const TransactionRepository();
 
-  // Dữ liệu mẫu — sau này thay bằng dữ liệu thật lấy từ database/API.
-  final List<TransactionData> _transactions = [
-    TransactionData(
-      type: TransactionType.expense,
-      category: TransactionCategory.sample[0], // Ăn uống
-      amount: 50000,
-      date: DateTime(2024, 9, 3),
-      note: 'Ăn trưa',
-    ),
-    TransactionData(
-      type: TransactionType.expense,
-      category: TransactionCategory.sample[1], // Di chuyển
-      amount: 100000,
-      date: DateTime(2024, 9, 3),
-      note: 'Xăng xe',
-    ),
-    TransactionData(
-      type: TransactionType.income,
-      category: TransactionCategory.sample[2], // Thu nhập
-      amount: 8000000,
-      date: DateTime(2024, 9, 1),
-      note: 'Lương tháng 9',
-    ),
-    TransactionData(
-      type: TransactionType.expense,
-      category: TransactionCategory.sample[3], // Mua sắm
-      amount: 300000,
-      date: DateTime(2024, 8, 31),
-      note: 'Mua sắm',
-    ),
-    TransactionData(
-      type: TransactionType.expense,
-      category: TransactionCategory.sample[4], // Giáo dục
-      amount: 500000,
-      date: DateTime(2024, 8, 30),
-      note: 'Học phí',
-    ),
-  ];
+  int _currentTab = 0;
+  bool _isLoading = true;
+  List<TransactionModel> _transactions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTransactions();
+  }
+
+  Future<void> _loadTransactions() async {
+    final data = await _repository.getTransactions();
+    if (!mounted) return;
+    setState(() {
+      _transactions = data;
+      _isLoading = false;
+    });
+  }
 
   double get _totalIncome => _transactions
-      .where((t) => t.type == TransactionType.income)
-      .fold(0, (sum, t) => sum + t.amount);
+      .where((t) => t.isIncome)
+      .fold<double>(0, (sum, t) => sum + t.amount);
 
   double get _totalExpense => _transactions
-      .where((t) => t.type == TransactionType.expense)
-      .fold(0, (sum, t) => sum + t.amount);
+      .where((t) => t.isExpense)
+      .fold<double>(0, (sum, t) => sum + t.amount);
 
   double get _balance => _totalIncome - _totalExpense;
 
   Future<void> _openAddTransaction() async {
-    final result = await Navigator.of(context).push<TransactionData>(
+    final changed = await Navigator.of(context).push<bool>(
       MaterialPageRoute(builder: (_) => const AddTransactionScreen()),
     );
-    if (result != null) {
-      setState(() => _transactions.insert(0, result));
-    }
+    if (changed == true) await _loadTransactions();
   }
 
-  Future<void> _openEditTransaction(int index) async {
-    final result = await Navigator.of(context).push<TransactionData>(
+  Future<void> _openEditTransaction(TransactionModel transaction) async {
+    final changed = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-        builder: (_) =>
-            EditTransactionScreen(transaction: _transactions[index]),
+        builder: (_) => EditTransactionScreen(transaction: transaction),
       ),
     );
-    if (result != null) {
-      setState(() => _transactions[index] = result);
+    if (changed == true) await _loadTransactions();
+  }
+
+  List<Widget> _buildRecentTransactions() {
+    if (_transactions.isEmpty) {
+      return const [
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 32),
+          child: Center(
+            child: Text(
+              'Chưa có giao dịch nào.\nBấm nút + để thêm giao dịch đầu tiên.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+          ),
+        ),
+      ];
     }
+
+    return _transactions
+        .take(5)
+        .map(
+          (t) => GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => _openEditTransaction(t),
+            child: TransactionTile(data: t),
+          ),
+        )
+        .toList();
   }
 
   @override
@@ -94,67 +97,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       backgroundColor: AppColors.screenBackground,
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
-          children: [
-            _buildTopBar(),
-            const SizedBox(height: 18),
-            BalanceCard(balance: _balance),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: SummaryCard(
-                    label: 'TỔNG THU NHẬP',
-                    amount: _totalIncome,
-                    icon: Icons.arrow_downward,
-                    backgroundColor: AppColors.glowGreen,
-                    accentColor: AppColors.secondaryDark,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: SummaryCard(
-                    label: 'TỔNG CHI TIÊU',
-                    amount: _totalExpense,
-                    icon: Icons.arrow_upward,
-                    backgroundColor: AppColors.coralLight,
-                    accentColor: AppColors.coral,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 22),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Giao dịch gần đây',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                Text(
-                  'Xem tất cả',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            ..._transactions.asMap().entries.map(
-              (entry) => GestureDetector(
-                onTap: () => _openEditTransaction(entry.key),
-                child: TransactionTile(data: entry.value),
-              ),
-            ),
-          ],
-        ),
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _buildContent(),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _openAddTransaction,
@@ -183,6 +128,65 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildContent() {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
+      children: [
+        _buildTopBar(),
+        const SizedBox(height: 18),
+        BalanceCard(balance: _balance),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: SummaryCard(
+                label: 'TỔNG THU NHẬP',
+                amount: _totalIncome,
+                icon: Icons.arrow_downward,
+                backgroundColor: AppColors.glowGreen,
+                accentColor: AppColors.secondaryDark,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: SummaryCard(
+                label: 'TỔNG CHI TIÊU',
+                amount: _totalExpense,
+                icon: Icons.arrow_upward,
+                backgroundColor: AppColors.coralLight,
+                accentColor: AppColors.coral,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 22),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Giao dịch gần đây',
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            Text(
+              'Xem tất cả',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        ..._buildRecentTransactions(),
+      ],
     );
   }
 

@@ -1,20 +1,28 @@
 import 'package:flutter/material.dart';
 
-import 'package:casestudy1/widgets/transaction_form.dart';
+import '../models/transaction_model.dart';
+import '../repositories/transaction_repository.dart';
+import '../widgets/transaction_form.dart';
 
 class EditTransactionScreen extends StatelessWidget {
   const EditTransactionScreen({super.key, required this.transaction});
 
-  final TransactionData transaction;
+  final TransactionModel transaction;
 
   @override
   Widget build(BuildContext context) {
+    const repository = TransactionRepository();
+
     return TransactionForm(
       title: 'Sửa giao dịch',
-      initialData: transaction, //
-      onSave: (data) {
-        // TODO: cập nhật giao dịch trong database/state management
-        Navigator.pop(context, data);
+      initialData: transaction,
+      onSave: (updated) async {
+        await repository.updateTransaction(updated);
+        if (context.mounted) Navigator.pop(context, true);
+      },
+      onDelete: () async {
+        await repository.deleteTransaction(transaction.id!);
+        if (context.mounted) Navigator.pop(context, true);
       },
     );
   }

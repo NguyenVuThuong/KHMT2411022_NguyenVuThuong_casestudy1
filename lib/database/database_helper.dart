@@ -1,6 +1,8 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../models/transaction_model.dart';
+
 const bool kSeedSampleData = true;
 
 class DatabaseHelper {
@@ -34,5 +36,53 @@ class DatabaseHelper {
         category TEXT NOT NULL
       )
     ''');
+
+    if (kSeedSampleData) {
+      await _seedSampleData(db);
+    }
+  }
+
+  Future<void> _seedSampleData(Database db) async {
+    const samples = [
+      TransactionModel(
+        title: 'Ăn trưa',
+        amount: 50000,
+        type: 'expense',
+        date: '2026-10-09',
+        category: 'Ăn uống',
+      ),
+      TransactionModel(
+        title: 'Xăng xe',
+        amount: 100000,
+        type: 'expense',
+        date: '2026-10-09',
+        category: 'Di chuyển',
+      ),
+      TransactionModel(
+        title: 'Lương tháng 10',
+        amount: 8000000,
+        type: 'income',
+        date: '2026-10-01',
+        category: 'Thu nhập',
+      ),
+      TransactionModel(
+        title: 'Mua sắm',
+        amount: 300000,
+        type: 'expense',
+        date: '2026-09-30',
+        category: 'Mua sắm',
+      ),
+      TransactionModel(
+        title: 'Học phí',
+        amount: 500000,
+        type: 'expense',
+        date: '2026-09-29',
+        category: 'Giáo dục',
+      ),
+    ];
+
+    for (final t in samples) {
+      await db.insert('transactions', t.toMap());
+    }
   }
 }

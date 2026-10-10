@@ -1,17 +1,20 @@
-import 'package:casestudy1/widgets/transaction_form.dart';
 import 'package:flutter/material.dart';
+
+import '../repositories/transaction_repository.dart';
+import '../widgets/transaction_form.dart';
 
 class AddTransactionScreen extends StatelessWidget {
   const AddTransactionScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    const repository = TransactionRepository();
+
     return TransactionForm(
       title: 'Thêm giao dịch',
-      initialData: null,
-      onSave: (data) {
-        // TODO: lưu giao dịch mới vào database/state management
-        Navigator.pop(context, data);
+      onSave: (transaction) async {
+        await repository.insertTransaction(transaction);
+        if (context.mounted) Navigator.pop(context, true);
       },
     );
   }

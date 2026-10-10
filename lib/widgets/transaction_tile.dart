@@ -1,22 +1,20 @@
 import 'package:flutter/material.dart';
 import '../models/transaction_category.dart';
+import '../models/transaction_model.dart';
 import '../theme/app_colors.dart';
 import '../utils/formatters.dart';
-import '../widgets/transaction_form.dart' show TransactionData;
 
-/// 1 dòng trong danh sách "Giao dịch gần đây".
-/// [title] là tên giao dịch (VD "Ăn trưa"), lấy từ field `note` của
-/// TransactionData; nếu note trống, hiển thị tạm tên danh mục.
+/// 1 dòng trong danh sách "Giao dịch gần đây", hiển thị dữ liệu đọc từ SQLite.
+/// Icon và màu được tra từ tên danh mục lưu trong cột `category`.
 class TransactionTile extends StatelessWidget {
   const TransactionTile({super.key, required this.data});
 
-  final TransactionData data;
+  final TransactionModel data;
 
   @override
   Widget build(BuildContext context) {
-    final isExpense = data.type == TransactionType.expense;
-    final amount = isExpense ? -data.amount : data.amount;
-    final title = data.note.isNotEmpty ? data.note : data.category.label;
+    final category = TransactionCategory.fromLabel(data.category);
+    final amount = data.isExpense ? -data.amount : data.amount;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -26,10 +24,10 @@ class TransactionTile extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: data.category.color,
+              color: category.color,
               shape: BoxShape.circle,
             ),
-            child: Icon(data.category.icon, size: 18, color: Colors.white),
+            child: Icon(category.icon, size: 18, color: Colors.white),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -37,7 +35,9 @@ class TransactionTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  data.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -48,15 +48,17 @@ class TransactionTile extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      data.category.label,
+                      data.category,
                       style: const TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 12,
                       ),
                     ),
                     const SizedBox(width: 10),
+                    // data.date là chuỗi ISO "2026-10-09" → parse ra DateTime
+                    // rồi hiển thị kiểu Việt Nam "09/10/2026"
                     Text(
-                      formatDate(data.date),
+                      formatDate(DateTime.parse(data.date)),
                       style: const TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 12,
@@ -67,12 +69,13 @@ class TransactionTile extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(width: 8),
           Text(
             formatCurrency(amount, showSign: true),
             style: TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 13,
-              color: isExpense ? AppColors.coral : AppColors.secondaryDark,
+              color: data.isExpense ? AppColors.coral : AppColors.secondaryDark,
             ),
           ),
         ],

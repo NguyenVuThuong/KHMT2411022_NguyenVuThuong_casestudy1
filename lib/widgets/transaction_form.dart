@@ -1,24 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../models/transaction_category.dart';
+import '../models/transaction_model.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
-
-class TransactionData {
-  const TransactionData({
-    required this.type,
-    required this.category,
-    required this.amount,
-    required this.date,
-    this.note = '',
-  });
-
-  final TransactionType type;
-  final TransactionCategory category;
-  final double amount;
-  final DateTime date;
-  final String note;
-}
+import '../utils/formatters.dart';
 
 class TransactionForm extends StatefulWidget {
   const TransactionForm({
@@ -26,11 +13,16 @@ class TransactionForm extends StatefulWidget {
     required this.title,
     this.initialData,
     required this.onSave,
+    this.onDelete,
   });
 
   final String title;
-  final TransactionData? initialData;
-  final ValueChanged<TransactionData> onSave;
+
+  final TransactionModel? initialData;
+
+  final Future<void> Function(TransactionModel transaction) onSave;
+
+  final Future<void> Function()? onDelete;
 
   @override
   State<TransactionForm> createState() => _TransactionFormState();
@@ -42,20 +34,35 @@ class _TransactionFormState extends State<TransactionForm> {
   late final TextEditingController _amountController;
   late final TextEditingController _noteController;
   late DateTime _date;
-
-  bool get _isEditMode => widget.initialData != null;
+  bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
     final data = widget.initialData;
-    _type = data?.type ?? TransactionType.expense;
-    _category = data?.category ?? TransactionCategory.sample.first;
-    _date = data?.date ?? DateTime.now();
-    _amountController = TextEditingController(
-      text: data == null ? '' : data.amount.toStringAsFixed(0),
-    );
-    _noteController = TextEditingController(text: data?.note ?? '');
+
+    if (data == null) {
+      // Chế độ THÊM: giá trị mặc định, ô nhập để trống
+      _type = TransactionType.expense;
+      _category = TransactionCategory.sample.first;
+      _date = DateTime.now();
+      _amountController = TextEditingController();
+      _noteController = TextEditingController();
+    } else {
+      // Chế độ SỬA: đổi dữ liệu từ SQLite (String) về kiểu dùng cho giao diện
+      _type = data.type == 'income'
+          ? TransactionType.income
+          : TransactionType.expense;
+      _category = TransactionCategory.fromLabel(data.category);
+      _date = DateTime.parse(data.date);
+      _amountController = TextEditingController(
+        text: data.amount.toStringAsFixed(0),
+      );
+
+      _noteController = TextEditingController(
+        text: data.title == data.category ? '' : data.title,
+      );
+    }
   }
 
   @override
@@ -75,17 +82,52 @@ class _TransactionFormState extends State<TransactionForm> {
     if (picked != null) setState(() => _date = picked);
   }
 
-  void _handleSave() {
-    final amount = double.tryParse(_amountController.text.trim()) ?? 0;
-    widget.onSave(
-      TransactionData(
-        type: _type,
-        category: _category,
-        amount: amount,
-        date: _date,
-        note: _noteController.text.trim(),
+  Future<void> _handleSave() async {
+    final amount = double.tryParse(_amountController.text.trim());
+    if (amount == null || amount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng nhập số tiền hợp lệ')),
+      );
+      return;
+    }
+
+    final note = _noteController.text.trim();
+    final transaction = TransactionModel(
+      id: widget.initialData?.id, //
+      title: note.isEmpty ? _category.label : note,
+      amount: amount,
+      type: _type.name, //
+      date: toIsoDate(_date),
+      category: _category.label,
+    );
+
+    setState(() => _isSaving = true);
+    try {
+      await widget.onSave(transaction);
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  Future<void> _confirmDelete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Xóa giao dịch?'),
+        content: const Text('Bạn có chắc muốn xóa giao dịch này không?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Hủy'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Xóa'),
+          ),
+        ],
       ),
     );
+    if (confirmed == true) await widget.onDelete!();
   }
 
   @override
@@ -112,6 +154,13 @@ class _TransactionFormState extends State<TransactionForm> {
             fontSize: 18,
           ),
         ),
+        actions: [
+          if (widget.onDelete != null)
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: AppColors.coral),
+              onPressed: _confirmDelete,
+            ),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -137,6 +186,7 @@ class _TransactionFormState extends State<TransactionForm> {
                 child: TextField(
                   controller: _amountController,
                   keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   style: AppTextStyles.subtitle.copyWith(
                     color: AppColors.textPrimary,
                   ),
@@ -194,9 +244,12 @@ class _TransactionFormState extends State<TransactionForm> {
                 width: double.infinity,
                 height: 52,
                 child: ElevatedButton(
-                  onPressed: _handleSave,
+                  onPressed: _isSaving ? null : _handleSave,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
+                    disabledBackgroundColor: AppColors.primary.withValues(
+                      alpha: 0.5,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -212,6 +265,8 @@ class _TransactionFormState extends State<TransactionForm> {
     );
   }
 }
+
+// ---------------- Các widget con dùng nội bộ trong form ----------------
 
 class _FieldLabel extends StatelessWidget {
   const _FieldLabel(this.text);

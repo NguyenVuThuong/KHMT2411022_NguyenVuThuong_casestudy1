@@ -41,4 +41,11 @@ class TransactionCategory {
       color: Color(0xFF16A394),
     ),
   ];
+
+  static TransactionCategory fromLabel(String label) {
+    return sample.firstWhere(
+      (c) => c.label == label,
+      orElse: () => sample.first,
+    );
+  }
 }
