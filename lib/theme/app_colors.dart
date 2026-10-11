@@ -18,9 +18,15 @@ class AppColors {
   static const Color coral = Color(0xFFF16A6A);
   static const Color coralLight = Color(0xFFFCE7E7);
 
+  /// Màu viền & nền cho các ô nhập liệu trong form
   static const Color inputBorder = Color(0xFFE0E0E6);
   static const Color inputHint = Color(0xFFB3B3BD);
   static const Color labelText = Color(0xFF2E2E3A);
 
   static const Color screenBackground = Color(0xFFF5F6FA);
+
+  static const Color income = Color(0xFF16A34A);
+  static const Color expense = Color(0xFFE5484D);
+  static const Color incomeBg = Color(0xFFE8F7EE);
+  static const Color expenseBg = Color(0xFFFDECEC);
 }

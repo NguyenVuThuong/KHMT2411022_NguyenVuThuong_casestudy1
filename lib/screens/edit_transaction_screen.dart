@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../controllers/transaction_controller.dart';
 import '../models/transaction_model.dart';
-import '../repositories/transaction_repository.dart';
 import '../widgets/transaction_form.dart';
 
 class EditTransactionScreen extends StatelessWidget {
@@ -11,18 +11,42 @@ class EditTransactionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const repository = TransactionRepository();
+    final controller = TransactionController.instance;
 
     return TransactionForm(
       title: 'Sửa giao dịch',
       initialData: transaction,
       onSave: (updated) async {
-        await repository.updateTransaction(updated);
-        if (context.mounted) Navigator.pop(context, true);
+        final navigator = Navigator.of(context);
+        final messenger = ScaffoldMessenger.of(context);
+
+        await controller.update(updated);
+
+        messenger
+          ..clearSnackBars()
+          ..showSnackBar(
+            const SnackBar(content: Text('Đã cập nhật giao dịch')),
+          );
+        if (context.mounted) navigator.pop();
       },
       onDelete: () async {
-        await repository.deleteTransaction(transaction.id!);
-        if (context.mounted) Navigator.pop(context, true);
+        final navigator = Navigator.of(context);
+        final messenger = ScaffoldMessenger.of(context);
+
+        await controller.delete(transaction);
+
+        messenger
+          ..clearSnackBars()
+          ..showSnackBar(
+            SnackBar(
+              content: const Text('Đã xóa giao dịch'),
+              action: SnackBarAction(
+                label: 'Hoàn tác',
+                onPressed: () => controller.restore(transaction),
+              ),
+            ),
+          );
+        if (context.mounted) navigator.pop();
       },
     );
   }

@@ -1,31 +1,68 @@
-/// Định dạng số tiền theo kiểu Việt Nam: 5000000 → "5.000.000 đ"
-/// Nếu [showSign] = true, số dương sẽ có dấu "+" phía trước (dùng cho
-/// khoản thu), số âm sẽ có dấu "-" (dùng cho khoản chi).
-String formatCurrency(double amount, {bool showSign = false}) {
-  final isNegative = amount < 0;
-  final intPart = amount.abs().truncate().toString();
+import 'package:flutter/services.dart';
 
+/// 5000000 → "5.000.000"
+String groupThousands(int value) {
+  final digits = value.abs().toString();
   final buffer = StringBuffer();
-  for (int i = 0; i < intPart.length; i++) {
-    if (i != 0 && (intPart.length - i) % 3 == 0) buffer.write('.');
-    buffer.write(intPart[i]);
+  for (var i = 0; i < digits.length; i++) {
+    if (i != 0 && (digits.length - i) % 3 == 0) buffer.write('.');
+    buffer.write(digits[i]);
   }
-
-  final sign = isNegative ? '-' : (showSign ? '+' : '');
-  return '$sign$buffer đ';
+  return buffer.toString();
 }
 
-/// Định dạng ngày theo kiểu Việt Nam: DateTime(2024,9,3) → "03/09/2024"
+/// Định dạng số tiền kiểu Việt Nam: 5000000 → "5.000.000 đ".
+/// [showSign] = true: số dương có dấu "+" (dùng cho khoản thu).
+String formatCurrency(double amount, {bool showSign = false}) {
+  final rounded = amount.round();
+  final sign = rounded < 0 ? '-' : (showSign ? '+' : '');
+  return '$sign${groupThousands(rounded)} đ';
+}
+
+/// DateTime(2026,10,9) → "09/10/2026" (để HIỂN THỊ cho người dùng)
 String formatDate(DateTime date) {
   final d = date.day.toString().padLeft(2, '0');
   final m = date.month.toString().padLeft(2, '0');
   return '$d/$m/${date.year}';
 }
 
-/// Đổi DateTime sang chuỗi ISO 'yyyy-MM-dd' để LƯU vào SQLite.
-/// DateTime(2026,10,9) → "2026-10-09"
 String toIsoDate(DateTime date) {
   final m = date.month.toString().padLeft(2, '0');
   final d = date.day.toString().padLeft(2, '0');
   return '${date.year}-$m-$d';
+}
+
+double? parseAmount(String text) {
+  final digits = text.replaceAll(RegExp(r'[^0-9]'), '');
+  if (digits.isEmpty) return null;
+  return double.tryParse(digits);
+}
+
+class ThousandsInputFormatter extends TextInputFormatter {
+  ThousandsInputFormatter({this.maxDigits = 12});
+
+  final int maxDigits;
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    var digits = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    digits = digits.replaceFirst(RegExp(r'^0+'), '');
+    if (digits.length > maxDigits) digits = digits.substring(0, maxDigits);
+
+    if (digits.isEmpty) {
+      return const TextEditingValue(
+        text: '',
+        selection: TextSelection.collapsed(offset: 0),
+      );
+    }
+
+    final formatted = groupThousands(int.parse(digits));
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
 }

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+
 import '../theme/app_colors.dart';
 import '../utils/formatters.dart';
 import 'wallet_icon.dart';
 
-/// Thẻ hiển thị số dư hiện tại ở đầu dashboard, có nút ẩn/hiện số dư
-/// và các chấm chỉ báo (page indicator) mô phỏng carousel nhiều thẻ.
 class BalanceCard extends StatefulWidget {
   const BalanceCard({super.key, required this.balance});
 
@@ -42,10 +41,7 @@ class _BalanceCardState extends State<BalanceCard> {
           Positioned(
             right: -10,
             top: 10,
-            child: Opacity(
-              opacity: 0.95,
-              child: WalletIcon(size: 72),
-            ),
+            child: Opacity(opacity: 0.95, child: WalletIcon(size: 72)),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,

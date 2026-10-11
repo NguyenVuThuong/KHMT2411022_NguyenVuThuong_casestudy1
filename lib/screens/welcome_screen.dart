@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
-import 'dashboard_screen.dart';
+import 'main_shell.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -69,9 +69,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     label: 'Bắt đầu',
                     onPressed: () {
                       Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (_) => const DashboardScreen(),
-                        ),
+                        MaterialPageRoute(builder: (_) => const MainShell()),
                       );
                     },
                   ),
@@ -97,6 +95,7 @@ class _WalletIcon extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
+          // Vệt glow mờ phía sau, tạo cảm giác "phát sáng" nhẹ
           Container(
             width: 120,
             height: 120,
@@ -105,7 +104,7 @@ class _WalletIcon extends StatelessWidget {
               shape: BoxShape.circle,
             ),
           ),
-
+          // Nắp ví (xanh lá) — đặt lệch phía sau + có bóng đổ riêng
           Positioned(
             top: 14,
             child: Container(
@@ -124,7 +123,7 @@ class _WalletIcon extends StatelessWidget {
               ),
             ),
           ),
-
+          // Thân ví (xanh dương) — nổi lên trên, bóng đổ rõ hơn
           Positioned(
             bottom: 8,
             child: Container(
@@ -168,42 +167,46 @@ class _WalletIcon extends StatelessWidget {
 }
 
 class _PrimaryButton extends StatelessWidget {
+  const _PrimaryButton({required this.label, required this.onPressed});
+
   final String label;
   final VoidCallback onPressed;
-
-  const _PrimaryButton({required this.label, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 52, // chiều cao cố định của nút
+      height: 56,
       child: DecoratedBox(
         decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
           gradient: const LinearGradient(
-            colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+            colors: [AppColors.primary, AppColors.primaryDark],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
           ),
-          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: 0.35),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(14),
-            onTap: onPressed,
-            child: Center(
-              // <-- căn giữa cả ngang lẫn dọc
-              child: Text(
-                label,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  height: 1.0, // tránh dòng chữ bị đẩy lên/xuống
-                ),
-              ),
+        // Nút nền trong suốt đặt lên trên để thấy gradient phía sau; hiệu ứng
+        // gợn sóng khi nhấn vẫn hoạt động vì ElevatedButton có Material riêng.
+        child: ElevatedButton(
+          onPressed: onPressed,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            elevation: 0,
+            minimumSize: const Size.fromHeight(56),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
             ),
           ),
+          child: Text(label, style: AppTextStyles.button),
         ),
       ),
     );

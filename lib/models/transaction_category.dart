@@ -1,51 +1,70 @@
 import 'package:flutter/material.dart';
 
-enum TransactionType { expense, income }
-
 class TransactionCategory {
+  final String name;
+  final IconData icon;
+  final Color color;
+
   const TransactionCategory({
-    required this.label,
+    required this.name,
     required this.icon,
     required this.color,
   });
 
-  final String label;
-  final IconData icon;
-
-  final Color color;
-
-  static const List<TransactionCategory> sample = [
+  static const List<TransactionCategory> expenseCategories = [
     TransactionCategory(
-      label: 'Ăn uống',
+      name: 'Ăn uống',
       icon: Icons.restaurant,
-      color: Color(0xFFFF7A45),
+      color: Color(0xFFF59E0B),
     ),
     TransactionCategory(
-      label: 'Di chuyển',
-      icon: Icons.directions_car,
+      name: 'Di chuyển',
+      icon: Icons.directions_bus,
       color: Color(0xFF3B82F6),
     ),
     TransactionCategory(
-      label: 'Thu nhập',
-      icon: Icons.savings,
-      color: Color(0xFF4CAF7D),
-    ),
-    TransactionCategory(
-      label: 'Mua sắm',
+      name: 'Mua sắm',
       icon: Icons.shopping_bag,
-      color: Color(0xFF9C6ADE),
+      color: Color(0xFFEC4899),
     ),
     TransactionCategory(
-      label: 'Giáo dục',
-      icon: Icons.school,
-      color: Color(0xFF16A394),
+      name: 'Hóa đơn',
+      icon: Icons.receipt_long,
+      color: Color(0xFF10B981),
+    ),
+    TransactionCategory(
+      name: 'Khác',
+      icon: Icons.more_horiz,
+      color: Color(0xFF64748B),
     ),
   ];
 
-  static TransactionCategory fromLabel(String label) {
-    return sample.firstWhere(
-      (c) => c.label == label,
-      orElse: () => sample.first,
+  static const List<TransactionCategory> incomeCategories = [
+    TransactionCategory(
+      name: 'Thu nhập',
+      icon: Icons.savings,
+      color: Color(0xFF22C55E),
+    ),
+    TransactionCategory(
+      name: 'Lương',
+      icon: Icons.payments,
+      color: Color(0xFF16A34A),
+    ),
+    TransactionCategory(
+      name: 'Thưởng',
+      icon: Icons.card_giftcard,
+      color: Color(0xFF0EA5E9),
+    ),
+  ];
+
+  static List<TransactionCategory> forType(bool isExpense) =>
+      isExpense ? expenseCategories : incomeCategories;
+
+  static TransactionCategory find(String name, {required bool isExpense}) {
+    final list = forType(isExpense);
+    return list.firstWhere(
+      (c) => c.name == name,
+      orElse: () => isExpense ? list.last : list.first,
     );
   }
 }

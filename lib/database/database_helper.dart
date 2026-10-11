@@ -63,7 +63,7 @@ class DatabaseHelper {
         amount: 8000000,
         type: 'income',
         date: '2026-10-01',
-        category: 'Thu nhập',
+        category: 'Lương',
       ),
       TransactionModel(
         title: 'Mua sắm',
@@ -77,7 +77,7 @@ class DatabaseHelper {
         amount: 500000,
         type: 'expense',
         date: '2026-09-29',
-        category: 'Giáo dục',
+        category: 'Hóa đơn',
       ),
     ];
 

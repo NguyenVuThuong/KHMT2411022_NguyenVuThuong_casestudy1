@@ -38,7 +38,7 @@ class TransactionModel {
     return TransactionModel(
       id: map['id'] as int?,
       title: map['title'] as String,
-
+      // SQLite có thể trả về int hoặc double → ép về num rồi sang double
       amount: (map['amount'] as num).toDouble(),
       type: map['type'] as String,
       date: map['date'] as String,
