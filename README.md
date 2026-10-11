@@ -1,17 +1,23 @@
-# casestudy1
+# KHMT2411022 - Nguyễn Vũ Thương - Case Study 1
 
-A new Flutter project.
+## Thông tin sinh viên
 
-## Getting Started
+- **Họ và tên:** Nguyễn Vũ Thương
+- **MSSV:** KHMT2411022
+- **Email:** nvthuongkhmt2411022@student.ctuet.edu.vn
 
-This project is a starting point for a Flutter application.
+## Thông tin project
 
-A few resources to get you started if this is your first Flutter project:
+- **Tên project:** casestudy1
+- **Nhánh nộp bài:** `buoi2`
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Nội dung đã thực hiện (Buổi 2)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+-Checkout nhánh buoi1 và commit lên thành nhánh buoi2
+-Xây dựng UI theo yêu cầu
+
+
+## Link repository
+
+https://github.com/NguyenVuThuong/KHMT2411022_NguyenVuThuong_casestudy1
+
